@@ -210,7 +210,7 @@ for g = 0,n_gs-1 do begin
                ;Write missing data and flagged data as nan
                data_in[WHERE(data_in eq -9999.9, /null)] = !values.f_nan
                data_in[WHERE(data_qc eq 1, /null)] = !values.f_nan
-               if KEYWROD_SET(strictqc) then $
+               if KEYWORD_SET(strictqc) then $
                   data_in[WHERE(data_qc eq 2, /null)] = !values.f_nan
 
                data_in = [t_data,data_in]
