@@ -1,0 +1,70 @@
+;INPUTS
+;START YEAR
+;START MONTH
+;START DAY
+;START HOUR
+;tOffset to center time of orbit
+
+;OUTPUTS
+;ECMWF_PATHS [6] -->{GGAS1,GGAS2,GGAM1,GGAM2,GPAM1,GPAM2}
+;ECMWF_FILES [6] -->{GGAS1,GGAS2,GGAM1,GGAM2,GPAM1,GPAM2}
+
+PRO VAL_FIND_ECMWF_FILES,YEAR,MONTH,DAY,HOUR,MINUTE,tOffset,YYYY1,MM1,DD1,HR1,YYYY2,MM2,DD2,HR2
+
+; CENTER TIME OF ORBIT
+CALDAT,JULDAY(MONTH*1.,DAY*1.,YEAR*1.,HOUR*1.,MINUTE*1.)+tOffset,MM,DD,YYYY,HR,MN
+ hr = ( STRING(FORMAT='(I02)',HR)+STRING(FORMAT='(I02)',MN) )*1.
+
+ ;ECMWF Files
+ YYYY1 = YYYY & YYYY2 = YYYY
+ MM1 = MM & MM2 = MM
+ DD1 = DD & DD2 = DD
+
+ IF hr ge 0. AND hr lt 600. THEN BEGIN
+  hr1 = '0000' & hr2 = '0600'
+ ENDIF
+ IF hr ge 600. AND hr lt 1200. THEN BEGIN
+  hr1 = '0600' & hr2 = '1200'
+ ENDIF
+ IF hr ge 1200. AND hr lt 1800. THEN BEGIN
+  hr1 = '1200' & hr2 = '1800'
+ ENDIF
+ IF hr ge 1800. THEN BEGIN
+  CALDAT,JULDAY(MM*1.,DD*1.,YYYY*1.),MM1,DD1,YYYY1
+  CALDAT,JULDAY(MM*1.,DD*1.,YYYY*1.)+1,MM2,DD2,YYYY2
+  YYYY1=YYYY   & YYYY2=STRING(FORMAT='(I04)',YYYY2)
+  MM1 = MM     & MM2 = STRING(FORMAT='(I02)',MM2)
+  DD1 = DD     & DD2 = STRING(FORMAT='(I02)',DD2)
+  hr1 = '1800' & hr2 = '0000'
+ ENDIF
+
+ ;Ensure output is string
+ YYYY1 = STRING(FORMAT='(I04)',YYYY1*1.)
+ MM1   = STRING(FORMAT='(I02)',MM1*1.)
+ DD1   = STRING(FORMAT='(I02)',DD1*1.)
+
+ YYYY2 = STRING(FORMAT='(I04)',YYYY2*1.)
+ MM2   = STRING(FORMAT='(I02)',MM2*1.)
+ DD2   = STRING(FORMAT='(I02)',DD2*1.)
+
+
+
+  ;ECMWF FILES
+;  GGAS_PATHS = ecmwf_BADC_path+'gg/as/'+[YYYY1+'/'+MM1+'/'+DD1+'/',YYYY2+'/'+MM2+'/'+DD2]
+;  GGAS_FILES = GGAS_PATHS+'/ggas'+[YYYY1+MM1+DD1+hr1,YYYY2+MM2+DD2+hr2]+'.nc'
+
+;  GGAM_PATHS = ecmwf_BADC_path+'gg/am/'+[YYYY1+'/'+MM1+'/'+DD1+'/',YYYY2+'/'+MM2+'/'+DD2]
+;  GGAM_FILES = GGAM_PATHS+'/ggam'+[YYYY1+MM1+DD1+hr1,YYYY2+MM2+DD2+hr2]+'.grb'
+
+;  GPAM_PATHS = ecmwf_BADC_path+'sp/am/'+[YYYY1+'/'+MM1+'/'+DD1+'/',YYYY2+'/'+MM2+'/'+DD2]
+;  GPAM_FILES = GPAM_PATHS+'/spam'+[YYYY1+MM1+DD1+hr1,YYYY2+MM2+DD2+hr2]+'.grb'
+
+  ;Check that files exist
+;  GGAS_FILES = file_search(ggas_files,count=ggasCT)
+;  GGAM_FILES = file_search(ggam_files,count=ggamCT)
+;  GPAM_FILES = file_search(gpam_files,count=gpamCT)
+;   IF ggasCT LT 2. OR ggamCT LT 2. OR gpamCT LT 2. THEN STOP,'ECMWF FILE MISSING'
+
+
+RETURN
+END
