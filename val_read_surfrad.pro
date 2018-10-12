@@ -27,7 +27,7 @@ n_month = N_ELEMENTS(month)
 location = FLTARR(2,n_gs)
 
 ;Root path for surfrad files
-root = '/group_workspaces/cems2/nceo_generic/cloud_ecv/validation/surfrad/'
+root = '/group_workspaces/cems2/nceo_generic/cloud_ecv/validation_data/surfrad/'
 
 ;create save directory if none exists
 SPAWN, 'mkdir -p -v '+savepath
@@ -138,7 +138,7 @@ for g = 0,n_gs-1 do begin
          ;Search for existing file and begin if none exists or replace keyword
          ;is set
          junk = FILE_SEARCH(savename, count=junkct)
-         
+
          if KEYWORD_SET(replace) || junkct eq 0 then begin
 
             ;define file path and search string(s)
@@ -157,11 +157,11 @@ for g = 0,n_gs-1 do begin
                   ;482 for SURFRAD (480 rows of data + 2 header lines)
                   n_lines = FILE_LINES(files[f])
 
-                  ;Get station name from first line of file, 
-                  ;then lat/lon/elev from 2nd line   
+                  ;Get station name from first line of file,
+                  ;then lat/lon/elev from 2nd line
                   tstr = ''
                   ;First line
-                  READF, lun, tstr 
+                  READF, lun, tstr
                   if f eq 0 then $
                      station_name = tstr[0]
                   ;Second line
@@ -179,7 +179,7 @@ for g = 0,n_gs-1 do begin
                   ;Now get actual data - note file has 48 columns due to qc flags
                   temp = FLTARR(48, n_lines-2)
                   READF, lun, temp
-   
+
                   ;Add each files data to the bottom of the array, defining array if first loop
                   if f eq 0 then $
                      data_in = list(temp) $
@@ -190,10 +190,10 @@ for g = 0,n_gs-1 do begin
                   CLOSE, lun
                   FREE_LUN, lun
                endfor
-      
+
                ;Convert list to array, concatenating over second dimension
                data_in = data_in.toarray(dimension=2)
-      
+
                ;Get column length of data array
                l_data = N_ELEMENTS(data_in[0,*])
 
@@ -212,9 +212,9 @@ for g = 0,n_gs-1 do begin
                data_in[WHERE(data_qc eq 1, /null)] = !values.f_nan
                if KEYWROD_SET(strictqc) then $
                   data_in[WHERE(data_qc eq 2, /null)] = !values.f_nan
-               
+
                data_in = [t_data,data_in]
-               
+
                data_out = FLTARR(n_elements(header_out), l_data)
 
                ;q using rh, T, P (cols 24,23,27)
@@ -270,4 +270,3 @@ for g = 0,n_gs-1 do begin
    endfor ;year
 endfor ;day
 end
-

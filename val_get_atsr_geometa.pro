@@ -21,7 +21,7 @@ else if satellite eq 'ATSR2' then satellite = 'ATSR2_ERS2'
 VAL_CHECK_KEYWORD, satellite, def_sats_path, key_name='satellite'
 
 ;Path to cloud_cci data
-prim_path = '/group_workspaces/cems/cloud_ecv/public/ESA_Cloud_CCI/CLD_PRODUCTS/L2/'
+prim_path = '/group_workspaces/jasmin_2/cloud_ecv/public/ESA_Cloud_CCI/CLD_PRODUCTS/L2/'
 
 ;Check d_or_n keyword and set version number accordingly
 if KEYWORD_SET(d_or_n) && d_or_n eq 'N' then begin
@@ -84,7 +84,7 @@ if ct ne N_ELEMENTS(txt_files) then begin
       j = [wh_ms[i]]
 
       spawn, 'mkdir -p -v '+meta_path+subdir[j]
-      
+
       tstr = prim_path+satellite+'/v2.0/'+yrstr[j]+'/'+mostr[j]+'/'+dystr[j]+ $
              '/'+'/ESACCI-L2-CLOUD-CLD-*'+yrstr[j]+mostr[j]+dystr[j]+hrstr[j] $
              +mnstr[j]+'_'+version[j]+'.primary.nc'
@@ -102,7 +102,7 @@ if ct ne N_ELEMENTS(txt_files) then begin
             header = ['Lon0            ','Lat0            ', $
                       'Lon1            ','Lat1            ']
             wr_arr = STRING([lon0,lat0,lon1,lat1])
-            
+
             OPENW, lun, txt_files[j], /get_lun
             PRINTF, lun, FILE_BASENAME(l1_files[j])
             PRINTF, lun, L2_cld
