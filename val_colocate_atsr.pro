@@ -65,24 +65,24 @@ if n_files gt 0 then begin
    date = DBLARR(n_loc, n_files)
    cx = INTARR(n_loc, n_files)
    cy = cx
-   
+
    retr_ct = INTARR(n_loc,n_files)
 
    PRINT, 'Reading geo metadata...'
-   
+
    for i = 0,n_files-1 do begin
       geometa = VAL_READ_ATSR_GEOMETA(geometa_files[i])
-      
+
       n_col = N_ELEMENTS(geometa[0,*])
-      
+
       lon0 = REBIN(geometa[0,*], n_loc, n_col)
       lat0 = REBIN(geometa[1,*], n_loc, n_col)
       lon1 = REBIN(geometa[2,*], n_loc, n_col)
       lat1 = REBIN(geometa[3,*], n_loc, n_col)
-      
+
       mn0 = MIN(ABS(lat0-REBIN(lat, n_loc, n_col)), wh_m0, dimension=2)
       mn1 = MIN(ABS(lat1-REBIN(lat, n_loc, n_col)), wh_m1, dimension=2)
-      
+
       retr_ct[*,i] = (lon gt lon0[wh_m0]) xor (lon gt lon1[wh_m1])
       ;Bug: need to filter out values that cross the date line!
       wh_dl = WHERE(ABS(lon0[wh_m0] - lon1[wh_m1]) gt 180, /null, dl_ct)
@@ -113,32 +113,36 @@ if geo_ct gt 0 then begin
    for i = 0,geo_ct-1 do begin
       j = wh[i]
       geometa = VAL_READ_ATSR_GEOMETA(geometa_files[j],header, l1_name, l2_name)
-      
+
       l2_cld = FILE_SEARCH(l2_name, count=ct)
+      l1_file = VAL_ATSR_FILE_INFO, l1_name, l1_file
+      l1_file = FILE_SEARCH(l1_file, cound=ct)
       if ct gt 0 then begin
-         stat = READ_NCDF(l2_cld[0], data, variable_list=['lat','lon'])
+         ;stat = READ_NCDF(l2_cld[0], data, variable_list=['lat','lon'])
+         read_atsr_lat_lon, l1_file, atsr_lat, atsr_lon
+         stop
          if stat eq 1 then begin
             PRINT, FILE_BASENAME(l2_cld[0])
-            sl = SIZE(data.lat, /dimensions)
+            sl = SIZE(atsr_lat, /dimensions)
             ;Loop over locations
             for k = 0,n_loc-1 do begin
                if retr_ct[k,j] ne 0 then begin
                   ;get distance to location from each pixel
-                  dist = VAL_GET_DIST(data.lat, data.lon, lat[k], lon[k])
-                  
+                  dist = VAL_GET_DIST(atsr_lat, atsr_lon, lat[k], lon[k])
+
                   ;Find the closest pixel
                   mn = MIN(dist, whm)
                   PRINT, mn
-            
+
                   ;Convert minimum index to array subscripts
-                  ind = ARRAY_INDICES(data.lat, whm)
+                  ind = ARRAY_INDICES(atsr_lat, whm)
                   PRINT, ind
 
-                  
+
 
                   if ind[0] ge dkm && ind[0] lt sl[0]-dkm && $
-                     ind[1] ge dkm && ind[1] lt sl[1]-dkm then begin 
-                     
+                     ind[1] ge dkm && ind[1] lt sl[1]-dkm then begin
+
                      cx[k,j] = ind[0]
                      cy[k,j] = ind[1]
                   endif $
@@ -146,19 +150,19 @@ if geo_ct gt 0 then begin
                   PRINT, retr_ct[k,j]
                endif
             endfor
-            
+
             VAL_ATSR_FILE_INFO, l1_name, l1_out, time, sensor, timestr
 
             l1_files[*,j] = l1_out
             l2_files[*,j] = l2_cld[0]
 
             date[*,j] = JULDAY(time[2],time[3],time[0],time[4],time[5],time[6])
-            
+
          endif $
          else retr_ct[*,j] = 0
       endif $
       else retr_ct[*,j] = 0
-          
+
    endfor
 
    PRINT, 'Exact matches found:', TOTAL((retr_ct ne 0), 2)
@@ -175,14 +179,14 @@ if geo_ct gt 0 then begin
    l_date = list()
    l_cx = list()
    l_cy = list()
-   
+
    for j = 0,n_loc-1 do begin
       ;Find where match conditions met
       wh = WHERE(retr_ct[j,*] ne 0, /null, ct)
 
       if ct gt 0 then begin
-         l_l1_files.add, l1_files[j,wh] 
-         l_l2_files.add, l2_files[j,wh] 
+         l_l1_files.add, l1_files[j,wh]
+         l_l2_files.add, l2_files[j,wh]
          l_date.add, date[j,wh]
          l_cx.add, cx[j,wh]
          l_cy.add, cy[j,wh]
@@ -198,7 +202,7 @@ if geo_ct gt 0 then begin
 
    ;Compile output list
    out = list(l_l2_files, l_l1_files, l_date, l_cx, l_cy)
- 
+
 endif $
 else begin
    ;Error message if no overpasses found
@@ -209,4 +213,3 @@ endelse
 RETURN, out
 
 end
-

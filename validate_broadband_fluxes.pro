@@ -30,7 +30,7 @@ pro validate_broadband_fluxes, year, month, $
 ; Calling Sequence:
 ;
 ; validate_broadband_fluxes, year, month, [satellite=string]
-;                            [station=string], [d_or_n=string], 
+;                            [station=string], [d_or_n=string],
 ;                            [version=string], [dl=value],
 ;                            [dt=value], [prepath=string],
 ;                            [mainpath=string], [postpath=string],
@@ -57,17 +57,17 @@ pro validate_broadband_fluxes, year, month, $
 ;                'Alamosa_CO' 'Bondville_IL' 'Boulder_CO'
 ;                'Desert_Rock_NV' 'Fort_Peck_MT' 'Goodwin_Creek_MS'
 ;                'Penn_State_PA' 'Rutland_VT' 'Sioux_Falls_SD'
-;                'Wasco_OR' 
+;                'Wasco_OR'
 ;    d_or_n - string or string array of day/night options. Will default
 ;             to 'D' if missing. Valid inputs: 'D' 'N'
 ;   version - 5 character length string. Will default to 'fv2.0' if
 ;             missing
-;        dl - scalar value. Distance to ground site to average satellite 
+;        dl - scalar value. Distance to ground site to average satellite
 ;             measurements over. If ge 1 value is treated as km, else if
-;             lt 1 treated as degrees latitude. Defaults to 10km if 
+;             lt 1 treated as degrees latitude. Defaults to 10km if
 ;             missing.
 ;        dt - scalar integer. Number of time steps of ground site data
-;             to average on each side of overpass time. Defaults to 5 
+;             to average on each side of overpass time. Defaults to 5
 ;             if missing.
 ;   prepath - string. Path to ORAC preprocessor output files. Default
 ;             dependent on subset keyword.
@@ -91,7 +91,7 @@ pro validate_broadband_fluxes, year, month, $
 ; /get_files - boolean. Download missing L1 and geo files for MODIS.
 ; /replace_all - boolean. Replace all existing ORAC files.
 ; /run_orac - boolean. Run ORAC on colocated overpass files
-;   /subset - boolean. Subset ORAC retrievals around overpass location 
+;   /subset - boolean. Subset ORAC retrievals around overpass location
 ;             to reduce time for retrieval.
 ;  /process - boolean. Process ORAC overpass files and compare to
 ;             ground site and CERES data.
@@ -118,7 +118,7 @@ pro validate_broadband_fluxes, year, month, $
 ;                            /run_orac, fu_liou=1, /process
 ;
 ; 2016/08/10, WJ: created from "compare_orac_surfrad.pro". Added
-;   match_orbits procedure and subsetting of ORAC retrievals to 
+;   match_orbits procedure and subsetting of ORAC retrievals to
 ;   improve speed.
 ; 2016/08/22, WJ: Rebuild as more modular structure.
 ; 2016/08/24, WJ: Debugged colocation procedures for ATSR and MODIS,
@@ -131,38 +131,38 @@ pro validate_broadband_fluxes, year, month, $
 ;
 ;   coyote graphics library
 ;
-;   generic/get_ct.pro   
-;   generic/read_hdf4.pro  
-;   generic/set_op.pro     
-;   generic/val_check_batch.pro    
-;   generic/val_get_dist.pro  
+;   generic/get_ct.pro
+;   generic/read_hdf4.pro
+;   generic/set_op.pro
+;   generic/val_check_batch.pro
+;   generic/val_get_dist.pro
 ;   generic/val_loop_ctrl.pro
-;   generic/is_ncdf.pro  
-;   generic/read_ncdf.pro  
-;   generic/str_rebin.pro  
-;   generic/val_check_keyword.pro  
-;   generic/val_get_doy.pro   
-;   generic/val_struct_concat.pro     
+;   generic/is_ncdf.pro
+;   generic/read_ncdf.pro
+;   generic/str_rebin.pro
+;   generic/val_check_keyword.pro
+;   generic/val_get_doy.pro
+;   generic/val_struct_concat.pro
 ;
-;   val_colocate_satellite.pro  
-;   val_find_ecmwf_files.pro  
-;   val_get_station_loc.pro        
-;   val_orac_bsub.pro          
+;   val_colocate_satellite.pro
+;   val_find_ecmwf_files.pro
+;   val_get_station_loc.pro
+;   val_orac_bsub.pro
 ;   val_read_modis_geometa.pro
-;   val_atsr_file_info.pro  
-;   val_compare_scatter.pro     
-;   val_find_overpass.pro     
-;   val_process_nc.pro         
+;   val_atsr_file_info.pro
+;   val_compare_scatter.pro
+;   val_find_overpass.pro
+;   val_process_nc.pro
 ;   val_read_surfrad.pro
-;   val_colocate_atsr.pro   
-;   val_compare_versions.pro    
-;   val_get_atsr_geometa.pro  
-;   val_match_modis_geometa.pro    
+;   val_colocate_atsr.pro
+;   val_compare_versions.pro
+;   val_get_atsr_geometa.pro
+;   val_match_modis_geometa.pro
 ;   val_process.pro
-;   val_colocate_modis.pro  
-;   val_download_modis.pro      
-;   val_get_station_data.pro  
-;   val_modis_file_info.pro        
+;   val_colocate_modis.pro
+;   val_download_modis.pro
+;   val_get_station_data.pro
+;   val_modis_file_info.pro
 ;   val_read_atsr_geometa.pro
 ;
 
@@ -287,7 +287,8 @@ for i = 0,C2.n-1 do begin
    orbit_saves.add, VAL_COLOCATE_SATELLITE(C2.satellite[i], C2.year[i], $
                                        C2.month[i], dl, station=station, $
                                        d_or_n=C2.d_or_n[i], replace=replace, $
-                                       get_files=get_files)
+                                       get_files=get_files, $
+                                       savepath=savepath+'colocation/')
 endfor
 
 ;?
@@ -309,12 +310,12 @@ if KEYWORD_SET(subset) then begin
    for i = 0,n_saves-1 do begin
 
       if orbit_saves[i] ne '' then begin
-      
+
          temp = FILE_SEARCH(orbit_saves[i], count=file_ct)
-         
+
          if file_ct gt 0 then begin
             run_ct[i] = 1
-            
+
                                 ;Restore colocation file
             RESTORE, orbit_saves[i]
             X0 = cx - dkm + 1
@@ -323,19 +324,19 @@ if KEYWORD_SET(subset) then begin
             Y0 = cy - dkm + 1
             Y0 >= 1
             Y1 = cy + dkm + 1
-            
+
                                 ;Find sensor name from L1 file name
             sensor = STRMID(FILE_BASENAME(l1_files),0,8)
-            
+
             sensor[WHERE(sensor eq 'MYD021KM',/null)] = 'MODIS-AQUA'
             sensor[WHERE(sensor eq 'MOD021KM',/null)] = 'MODIS-TERRA'
             sensor[WHERE(sensor eq 'AT2_TOA_',/null)] = 'ATSR2'
             sensor[WHERE(sensor eq 'ATS_TOA_',/null)] = 'AATSR'
-            
+
             sensor1 = sensor
             sensor1[WHERE(sensor eq 'MODIS-AQUA' or $
                           sensor eq 'MODIS-TERRA', /null)] = 'MODIS'
-         
+
             platform = sensor
             platform[WHERE(sensor eq 'MODIS-AQUA', /null)] = 'AQUA'
             platform[WHERE(sensor eq 'MODIS-TERRA', /null)] = 'TERRA'
@@ -349,13 +350,13 @@ if KEYWORD_SET(subset) then begin
             yrstr = STRING(yr, format='(I04)')
             hrstr = STRING(hr, format='(I02)')
             mnstr = STRING(mn, format='(I02)')
-            
+
                                 ;Generate subdirectory names for subsetted files
             subdir = sensor+'/'+yrstr+'/'+mostr+'/'+dystr+'/'+C.station[i]
-            
+
             rprefix = subdir+'/ESACCI-L2-CLOUD-CLD-'+sensor1+'_CC4CL_'+ $
                       platform+'_'+yrstr+mostr+dystr+hrstr+mnstr+'_'+version
-            
+
             prefix.add, rprefix
 
             rprepath = prepath+subdir+'/PRE'
@@ -371,7 +372,7 @@ if KEYWORD_SET(subset) then begin
                              FILE_SEARCH(radpath+rprefix+'.bugsrad.nc', $
                                          count=rad_ct), diff_ind=wh)
             endif $
-            else begin 
+            else begin
                wh = INDGEN(n_run)
                rad_ct = 0
             endelse
@@ -384,14 +385,14 @@ if KEYWORD_SET(subset) then begin
                ;Submit batch jobs
                for j = 0,N_ELEMENTS(wh)-1 do begin
                   k = wh[j]
-                  
+
                   if sensor[k] eq 'ATSR2' or sensor[k] eq 'AATSR' then h = 1 $
                   else if KEYWORD_SET(heritage) then h = 1 $
                   else h = 0
 
                   if C.d_or_n[i] eq 'D' then dn = '1' $
                   else if C.d_or_n[i] eq 'N' then dn = '2'
-               
+
 
                   VAL_ORAC_BSUB, l1file=l1_files[k], geofile=geo_files[k], $
                                  /rPre, /rWat, /rIce, /rPst, /rDer, $
@@ -406,7 +407,7 @@ if KEYWORD_SET(subset) then begin
                                  _extra=ex
                endfor
             endif
-         endif 
+         endif
       endif
    ;End loop over save files
    endfor
@@ -428,36 +429,36 @@ if ~KEYWORD_SET(subset) then begin
    run_ct = INTARR(C.n)
 
    prefix = list()
-   
+
    for i = 0,n_saves-1 do begin
-      
+
       if orbit_saves[i] ne '' then begin
-         
+
          temp = FILE_SEARCH(orbit_saves[i], count=file_ct)
-      
+
          if file_ct gt 0 then begin
             run_ct[i] = 1
-            
+
             ;Restore colocation file
             RESTORE, orbit_saves[i]
             all_l1.add, l1_files
             all_geo.add, geo_files
             all_date.add, date
-            
+
             ;Process output prefix names
 
             ;Find sensor name from L1 file name
             sensor = STRMID(FILE_BASENAME(l1_files),0,8)
-      
+
             sensor[WHERE(sensor eq 'MYD021KM',/null)] = 'MODIS-AQUA'
             sensor[WHERE(sensor eq 'MOD021KM',/null)] = 'MODIS-TERRA'
             sensor[WHERE(sensor eq 'AT2_TOA_',/null)] = 'ATSR2'
             sensor[WHERE(sensor eq 'ATS_TOA_',/null)] = 'AATSR'
-            
+
             sensor1 = sensor
             sensor1[WHERE(sensor eq 'MODIS-AQUA' or $
                           sensor eq 'MODIS-TERRA', /null)] = 'MODIS'
-            
+
             platform = sensor
             platform[WHERE(sensor eq 'MODIS-AQUA', /null)] = 'AQUA'
             platform[WHERE(sensor eq 'MODIS-TERRA', /null)] = 'TERRA'
@@ -474,7 +475,7 @@ if ~KEYWORD_SET(subset) then begin
 
             ;Generate subdirectory names for subsetted files
             subdir = sensor+'/'+yrstr+'/'+mostr+'/'+dystr+'/'
-      
+
 
             ;Add to prefix list
             prefix.add, subdir+'/ESACCI-L2-CLOUD-CLD-'+sensor1+'_CC4CL_'+ $
@@ -495,25 +496,25 @@ if ~KEYWORD_SET(subset) then begin
       geo_files = all_geo.toarray(dimension=1)
       date = all_date.toarray(dimension=1)
       rprefix = prefix.toarray(dimension=1)
-      
+
       ;Find sensor name from L1 file name
       sensor = STRMID(FILE_BASENAME(l1_files),0,8)
-      
+
       sensor[WHERE(sensor eq 'MYD021KM',/null)] = 'MODIS-AQUA'
       sensor[WHERE(sensor eq 'MOD021KM',/null)] = 'MODIS-TERRA'
       sensor[WHERE(sensor eq 'AT2_TOA_',/null)] = 'ATSR2'
       sensor[WHERE(sensor eq 'ATS_TOA_',/null)] = 'AATSR'
-      
+
       sensor1 = sensor
       sensor1[WHERE(sensor eq 'MODIS-AQUA' or $
                     sensor eq 'MODIS-TERRA', /null)] = 'MODIS'
-      
+
       platform = sensor
       platform[WHERE(sensor eq 'MODIS-AQUA', /null)] = 'AQUA'
       platform[WHERE(sensor eq 'MODIS-TERRA', /null)] = 'TERRA'
       platform[WHERE(sensor eq 'ATSR2', /null)] = 'ERS2'
       platform[WHERE(sensor eq  'AATSR', /null)] = 'Envisat'
-   
+
       ;Get date strings
       CALDAT, date, mo, dy, yr, hr, mn, sc
       mostr = STRING(mo, format='(I02)')
@@ -524,7 +525,7 @@ if ~KEYWORD_SET(subset) then begin
 
       ;Generate subdirectory names for subsetted files
       subdir = sensor+'/'+yrstr+'/'+mostr+'/'+dystr+'/'
-      
+
       ;prefix = subdir+'/ESACCI-L2-CLOUD-CLD-'+sensor1+'_CC4CL_'+ $
       ;         platform+'_'+yrstr+mostr+dystr+hrstr+mnstr+'_'+version
 
@@ -541,7 +542,7 @@ if ~KEYWORD_SET(subset) then begin
                        FILE_SEARCH(radpath+rprefix[wh_uniq]+'.bugsrad.nc', $
                                    count=rad_ct), diff_ind=wh)
       endif $
-      else begin 
+      else begin
          wh = INDGEN(N_ELEMENTS(wh_uniq))
          rad_ct = 0
       endelse
@@ -549,14 +550,14 @@ if ~KEYWORD_SET(subset) then begin
 ;===============================================================================
 ; Submit ORAC jobs
 ;===============================================================================
-      
+
       if KEYWORD_SET(run_orac) && rad_ct lt N_ELEMENTS(wh_uniq) then begin
          wh = wh_uniq[wh]
-      
+
          n_run = N_ELEMENTS(wh)
-      
+
          for j = 0,n_run-1 do begin
-            
+
             k = wh[j]
 
             if sensor[k] eq 'ATSR2' or sensor[k] eq 'AATSR' then h = 1 $
@@ -596,17 +597,17 @@ if KEYWORD_SET(process) then begin
                '_dt='+STRTRIM(STRING(dt),1)+'.sav'
 
    proc_saves = savepath+'proc/'+save_name
-   
+
    ;Loop over files to process
    for i = 0,C.n-1 do begin
       ;Search for existing files
       temp = FILE_SEARCH(proc_saves[i], count=proc_ct)
-      
+
       ;If no file found begin colocation processing
       if proc_ct eq 0 then begin
 
          PRINT, 'Processing '+save_name[i]
-      
+
          ;Find CERES data file - note, only 2008 currently!
          ;need to download using online tool
          CERES_file = FILE_SEARCH(CERESpath+CERESname+C.station[i]+'*', $
@@ -639,7 +640,7 @@ if KEYWORD_SET(process) then begin
 
       ;Check if structure is valid, if so concatenate
       if N_ELEMENTS(orac_out.(0)) gt 5 then begin
-         if N_ELEMENTS(orac) eq 0 then begin 
+         if N_ELEMENTS(orac) eq 0 then begin
             ;If first files to be found, definte variables
             orac = orac_out
             gs = gs_out
@@ -671,7 +672,7 @@ if KEYWORD_SET(process) then begin
       wh_qc = list()
 
       for i = 0,n_qc-1 do begin
-         
+
          wh = WHERE((qc and qcflag[i]) eq qcflag[i], /null, ct)
          if ct gt 0 then wh_qc.add, wh
 
@@ -687,25 +688,25 @@ if KEYWORD_SET(process) then begin
             orac.boa.(j)[wh_qc,*] = !values.f_nan
             gs.boa.(j)[wh_qc,*] = !values.f_nan
          endfor
-         
+
          for j = 0,2 do begin
             orac.toa.(j)[wh_qc,*] = !values.f_nan
             ceres.toa.(j)[wh_qc,*] = !values.f_nan
          endfor
       endif
    endif
-   
+
 ;===============================================================================
 ; Plot colocated data
 ;===============================================================================
 
    !p.font=1
-   
+
    flx = ['SW down','SW up','LW down','LW up', 'PAR']
 
    if KEYWORD_SET(fu_liou) then alg_name = 'Fu_Liou' $
                            else alg_name = 'BUGSrad'
-   
+
    for j = 0,4 do begin
       imtitle = alg_name+' '+satellite+' '+version+' BoA '+flx[j]+' - '+yrstr
       CGWINDOW, 'val_compare_scatter', gs.boa.(j),orac.boa.(j)[*,0], $
@@ -713,9 +714,9 @@ if KEYWORD_SET(process) then begin
                 title = imtitle, prefix=flx[j], $
                 /percent
    endfor
-   
+
    flx = flx[[0,1,3]]
-   
+
    for j = 0,2 do begin
       imtitle = alg_name+' '+satellite+' '+version+' ToA '+flx[j]+ $
                 ' vs CERES - '+yrstr
@@ -724,11 +725,11 @@ if KEYWORD_SET(process) then begin
                 title=imtitle, prefix=flx[j], $
                 /percent
    endfor
-   
+
    if KEYWORD_SET(ps) then begin
       flx = ['SWdn','SWup','LWdn','LWup', 'PAR']
       version = STRMID(version,0,3)+'_'+STRMID(version,4,1)
-      
+
       for j = 0,4 do begin
          imtitle = alg_name+' '+satellite+' '+version+' BoA '+flx[j]+' - '+yrstr
          imname = '~/'+satellite+'_'+version+'_BoA_'+flx[j]
@@ -740,7 +741,7 @@ if KEYWORD_SET(process) then begin
          CGPS_CLOSE
          SPAWN, 'convert '+imname+'.ps '+imname+'.png'
       endfor
-      
+
       flx = flx[[0,1,3]]
 
       for j = 0,2 do begin
@@ -762,6 +763,6 @@ endif
 
 stop
 
-         
+
 
 end

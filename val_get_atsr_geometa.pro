@@ -21,7 +21,7 @@ else if satellite eq 'ATSR2' then satellite = 'ATSR2_ERS2'
 VAL_CHECK_KEYWORD, satellite, def_sats_path, key_name='satellite'
 
 ;Path to cloud_cci data
-prim_path = '/group_workspaces/jasmin_2/cloud_ecv/public/ESA_Cloud_CCI/CLD_PRODUCTS/L2/'
+prim_path = '/group_workspaces/jasmin2/cloud_ecv/data_out/aatsr/postproc/'
 
 ;Check d_or_n keyword and set version number accordingly
 if KEYWORD_SET(d_or_n) && d_or_n eq 'N' then begin
@@ -29,7 +29,7 @@ if KEYWORD_SET(d_or_n) && d_or_n eq 'N' then begin
 endif $
 else begin
    d_or_n = 'D'
-   version = 'fv2.0'
+   version = 'fv20.0'
 endelse
 
 ;Get yyyy/mm strings
@@ -37,7 +37,7 @@ yrstr = STRING(format='(I04)',year)
 mostr = STRING(format='(I02)',month)
 
 ;Search for cloud_cci files
-search_path = prim_path+satellite+'/v2.0/'+yrstr+'/'+mostr+'/'
+search_path = prim_path+yrstr+'/'+mostr+'/'
 PRINT, 'Searching for files in '+search_path
 matched_files = FILE_SEARCH(search_path,'*'+version+'.primary.nc',count=fcnt)
 if N_ELEMENTS(version) gt 1 then begin
@@ -52,7 +52,14 @@ if d_or_n eq 'N' then $
 
 if fcnt eq 0 then MESSAGE, 'No ATSR files found'
 
+print, matched_files[1]
+
 VAL_ATSR_FILE_INFO, matched_files, l1_files, time, sensor, timestr
+
+print, l1_files[1]
+print, time[1]
+print, sensor[1]
+print, timestr[1]
 
 yrstr = timestr[0,*]
 mostr = timestr[2,*]
